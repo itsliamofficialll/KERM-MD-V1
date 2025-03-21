@@ -11,53 +11,164 @@ YT: KermHackTools
 Github: Kgtech-cmr
 */
 
-const config = require('../config');
+/*const config = require('../config');
 const { cmd, commands } = require('../command');
-const { proto, downloadContentFromMessage } = require('@whiskeysockets/baileys');
-const { sms,downloadMediaMessage } = require('../lib/msg');
-const fs = require('fs');
-const exec = require('child_process');
-const path = require('path');
-const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, sleep, fetchJson } = require('../lib/functions');
+const { downloadMediaMessage } = require('../lib/msg');
 
 cmd({
     pattern: "save",
-    desc: "Get status or media message.",
+    desc: "Envoie le message multimédia sauvegardé dans le PM du bot.",
     category: "owner",
     react: "👀",
     filename: __filename
-}, async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply }) => {
+}, async (conn, mek, m, { from, quoted, reply, botNumber }) => {
     try {
-        if (!quoted) return reply("Please reply to a media message!");
+        if (!quoted) return reply("❌ Répondez à un message multimédia pour le sauvegarder !");
 
-        try {
-            const buff = await quoted.getbuff;
-            const cap = quoted.msg.caption || '';
+        // Récupération du type de message cité
+        const mediaType = Object.keys(quoted.message)[0];
+        const stream = await downloadMediaMessage(quoted);
 
-            if (quoted.type === 'imageMessage') {
-                await conn.sendMessage(`${ownerNumber}@s.whatsapp.net`, {
-                    image: buff,
-                    caption: cap
-                }); 
-            } else if (quoted.type === 'videoMessage') {
-                await conn.sendMessage(`${ownerNumber}@s.whatsapp.net`, {
-                    video: buff,
-                    caption: cap
-                }); 
-            } else if (quoted.type === 'audioMessage') {
-                await conn.sendMessage(`${ownerNumber}@s.whatsapp.net`, {
-                    audio: buff,
-                    ptt: quoted.msg.ptt || false
-                }); 
-            } else {
-                return reply("_*Unknown/Unsupported media*_");
-            }
-        } catch (error) {
-            console.error(error);
-            reply(`${error}`);
+        if (!stream) return reply("❌ Échec du téléchargement du média.");
+
+        let messageOptions = {};
+        if (mediaType.includes('image')) {
+            messageOptions = { image: stream, caption: quoted.msg.caption || '' };
+        } else if (mediaType.includes('video')) {
+            messageOptions = { video: stream, caption: quoted.msg.caption || '' };
+        } else if (mediaType.includes('audio')) {
+            messageOptions = { audio: stream, mimetype: 'audio/mp4', ptt: quoted.msg.ptt || false };
+        } else if (mediaType.includes('document')) {
+            messageOptions = { document: stream, mimetype: quoted.msg.mimetype, fileName: quoted.msg.fileName };
+        } else {
+            return reply("❌ Type de média non supporté pour la sauvegarde.");
         }
-    } catch (e) {
-        console.error(e);
-        reply(`${e}`);
+
+        // Récupération du JID du bot
+        const botJid = conn.user.jid; // Utilisation du JID du bot (conn.user.jid)
+
+        // Envoi dans le PM du bot en utilisant son JID
+        await conn.sendMessage(botJid, messageOptions);
+        reply("✅ Média sauvegardé et envoyé dans le PM du bot !");
+    } catch (error) {
+        console.error("Erreur lors de la sauvegarde :", error);
+        reply("❌ Une erreur est survenue lors de la sauvegarde du média.");
     }
+});*/
+
+
+const axios = require('axios');
+const config = require('../config');
+const { cmd, commands } = require('../command');
+const { downloadMediaMessage } = require('../lib/msg');
+const fs = require("fs");
+/*
+cmd({
+    pattern: "save",
+    desc: "Envoie le message multimédia sauvegardé dans le PM du bot.",
+    category: "owner",
+    react: "💾",
+    filename: __filename
+}, async (conn, mek, m, { from, quoted, reply, botNumber }) => {
+    try {
+        if (!quoted) return reply("❌");
+        
+        const mime = quoted.type;
+        let ext, mediaType;
+        
+        if (mime === "imageMessage") {
+            ext = "jpg";
+            mediaType = "image";
+        } else if (mime === "videoMessage") {
+            ext = "mp4";
+            mediaType = "video";
+        } else if (mime === "audioMessage") {
+            ext = "mp3";
+            mediaType = "audio";
+        } else if (mime === "documentMessage") {
+            ext = quoted.msg.fileName.split('.').pop();
+            mediaType = "document";
+        } else {
+            return reply("❌.");
+        }
+
+        var buffer = await quoted.download();
+        var filePath = `${Date.now()}.${ext}`;
+
+        fs.writeFileSync(filePath, buffer); 
+
+        let messageOptions = {};
+        messageOptions[mediaType] = fs.readFileSync(filePath);
+
+        if (mediaType === "document") {
+            messageOptions.mimetype = quoted.msg.mimetype;
+            messageOptions.fileName = quoted.msg.fileName;
+        } else if (mediaType === "audio") {
+            messageOptions.mimetype = 'audio/mp4';
+            messageOptions.ptt = quoted.msg.ptt || false;
+        } else {
+            messageOptions.caption = quoted.msg.caption || '';
+        }
+
+        // Récupération du JID du bot
+        const botJid = conn.user.jid;
+        console.log("JID du bot :", botJid);
+
+        // Envoi dans le PM du bot en utilisant son JID
+        await conn.sendMessage(botJid, messageOptions);
+        reply("✅");
+        
+        fs.unlinkSync(filePath);
+
+    } catch (error) {
+        console.error("Erreur lors de la sauvegarde :", error);
+        reply("❌ Une erreur est survenue lors de la sauvegarde du média.");
+    }
+});
+*/
+
+cmd({
+  pattern: "save",
+  desc: "Save a status/photo/video and send it to your private chat (Owner only).",
+  category: "utility",
+  filename: __filename,
+}, async (conn, mek, m, { isOwner, reply, quoted }) => {
+  if (!isOwner) return reply("❌ You are not the owner!");
+
+  try {
+    if (!quoted) {
+      return reply("❌ Please reply to a status, photo or video message to save it.");
+    }
+    
+    let mime = (quoted.msg || quoted).mimetype || "";
+    let mediaType = "";
+    if (mime.startsWith("image")) {
+      mediaType = "image";
+    } else if (mime.startsWith("video")) {
+      mediaType = "video";
+    } else if (mime.startsWith("audio")) {
+      mediaType = "audio";
+    } else {
+      return reply("❌ Unsupported media type. Please reply to a status, photo, or video message.");
+    }
+    
+    const mediaBuffer = await quoted.download();
+    if (!mediaBuffer) return reply("❌ Failed to download the media.");
+    
+    let messageOptions = {};
+    if (mediaType === "image") {
+      messageOptions = { image: mediaBuffer };
+    } else if (mediaType === "video") {
+      messageOptions = { video: mediaBuffer, mimetype: 'video/mp4' };
+    } else if (mediaType === "audio") {
+      messageOptions = { audio: mediaBuffer, mimetype: 'audio/mpeg' };
+    }
+    
+    // Send the media directly to the owner's private chat (m.sender)
+    await conn.sendMessage(m.sender, messageOptions);
+    
+  } catch (error) {
+    console.error("Error in save command:", error);
+    reply("❌ An error occurred while saving the media.");
+  }
 });
