@@ -1,20 +1,19 @@
 {
     "bot-name": "KERM-MD-V1",
-    "description": "ᴊᴀᴠᴀsᴄʀɪᴘᴛ ᴡʜᴀᴛsᴀᴘᴘ ʙᴏᴛ ᴄʀᴇᴀᴛᴇᴅ ʙʏ Kɢ ᴛᴇᴄʜ",
-    "logo": "https://files.catbox.moe/yw2ty2.jpeg",
+    "description": "ᴊᴀᴠᴀsᴄʀɪᴘᴛ ᴡʜᴀᴛsᴀᴘᴘ ʙᴏᴛ ᴄʀᴇᴀᴛᴇᴅ ʙʏ LIAM UCHIHA",
+    "logo": "https://images.app.goo.gl/BKVijGoAVphn9yHX7",
     "keywords": ["bot"],
     "documentation-link": "https://pair-session-kermv4-pair.onrender.com",
     "owner-verification":"bookmakerp@gmail.com",
   
     "env": {
       "SESSION_ID": {
-        "description": "Put your SESSION_ID here. Make sure it starts with KERM-MD-V1~, or get session id from here, https://pair-session-kermv4-pair.onrender.com",
-        "value":"",
+        "description": "KERM-MD-V1~TBQBSA5Y#23VY4yCGcOJlURmMCzR-WAEvT4lyyjjAqVk_iYrLZInt",
         "required": true
         
       },
       "PREFIX": {
-        "description": "Bot command prefix, (e.g, . , ! @ etc",
+        "description": ".",
         "value":".",
         "required": true
         
@@ -32,7 +31,7 @@
         
       },
       "ALIVE_IMG": {
-        "description": "paste your image url if you don't have you can use this public url.",
+        "description": "https://images.app.goo.gl/BKVijGoAVphn9yHX7",
         "required": true,
         "value": "https://files.catbox.moe/yw2ty2.jpeg"
         
@@ -69,7 +68,7 @@
         
       },
       "BOT_NAME": {
-        "description": "write hear your name.",
+        "description": "Liam Uchiha",
         "required": true,
         "value": "✦『𝗞𝗘𝗥𝗠 𝗠𝗗 𝗩1』✦"
         
